@@ -12,12 +12,30 @@ if (!existsSync(backendPkg)) {
 
 const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
 
-const child = spawn(npmCmd, ["run", "build"], {
-  cwd: backendDir,
-  stdio: "inherit",
-  shell: false
-});
+function run(command, args, cwd) {
+  return new Promise((resolveRun, rejectRun) => {
+    const child = spawn([command, ...args].join(" "), [], {
+      cwd,
+      stdio: "inherit",
+      shell: true
+    });
+    child.on("exit", (code) => {
+      if ((code ?? 0) === 0) {
+        resolveRun(undefined);
+      } else {
+        rejectRun(new Error(`[prepare-backend] comando falhou: ${command} ${args.join(" ")}`));
+      }
+    });
+  });
+}
 
-child.on("exit", (code) => {
-  process.exit(code ?? 0);
-});
+try {
+  console.log("[prepare-backend] instalando dependencias do backend...");
+  await run(npmCmd, ["install", "--include=dev"], backendDir);
+  console.log("[prepare-backend] compilando backend...");
+  await run(npmCmd, ["run", "build"], backendDir);
+  process.exit(0);
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
