@@ -3,5 +3,9 @@ import { env } from "../lib/env.js";
 
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  ssl: env.DATABASE_URL.includes("supabase.co") ? { rejectUnauthorized: false } : false
+  ssl: env.DATABASE_URL.includes("supabase.co") ? { rejectUnauthorized: false } : false,
+  max: env.DB_POOL_MAX,
+  idleTimeoutMillis: env.DB_POOL_IDLE_TIMEOUT_MS,
+  connectionTimeoutMillis: env.DB_POOL_CONNECTION_TIMEOUT_MS,
+  maxUses: env.DB_POOL_MAX_USES
 });

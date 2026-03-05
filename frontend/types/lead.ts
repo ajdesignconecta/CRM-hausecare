@@ -8,11 +8,12 @@ export type LeadStatus =
 
 export type LeadLevel = "com_interesse" | "sem_interesse" | "nao_respondeu";
 export type HadResponse = "sim" | "nao";
+export type LeadTemperature = "frio" | "morno" | "quente";
 
 export type Lead = {
   id: string;
   lead_number: number;
-  company: string;
+  company: string | null;
   city: string | null;
   phone: string | null;
   whatsapp: string | null;
@@ -22,7 +23,13 @@ export type Lead = {
   decisor_name_role: string | null;
   had_response: HadResponse | null;
   lead_level: LeadLevel | null;
+  temperature: LeadTemperature | null;
   status: LeadStatus;
+  deal_value: number | null;
+  closed_at: string | null;
+  lost_reason: string | null;
+  next_action_date: string | null;
+  next_action_note: string | null;
   first_contact_date: string | null;
   followup_date_1: string | null;
   followup_date_2: string | null;

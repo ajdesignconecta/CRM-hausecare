@@ -10,7 +10,9 @@ export const LEAD_STATUS = [
 export const LEAD_LEVEL = ["com_interesse", "sem_interesse", "nao_respondeu"] as const;
 
 export const HAD_RESPONSE = ["sim", "nao"] as const;
+export const LEAD_TEMPERATURE = ["frio", "morno", "quente"] as const;
 
 export type LeadStatus = (typeof LEAD_STATUS)[number];
 export type LeadLevel = (typeof LEAD_LEVEL)[number];
 export type HadResponse = (typeof HAD_RESPONSE)[number];
+export type LeadTemperature = (typeof LEAD_TEMPERATURE)[number];

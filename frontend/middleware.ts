@@ -8,6 +8,11 @@ const PUBLIC_ROUTES = [
 ];
 
 export function middleware(request: NextRequest) {
+  // Do not protect static assets from /public (e.g. logo files).
+  if (/\.[a-zA-Z0-9]+$/.test(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   const isPublic = PUBLIC_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
   const hasSession = Boolean(request.cookies.get("crm_session")?.value);
 

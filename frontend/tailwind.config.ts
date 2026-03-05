@@ -17,8 +17,8 @@ const config: Config = {
         ink: "#242727"
       },
       boxShadow: {
-        soft: "0 16px 34px rgba(36, 39, 39, 0.10)",
-        card: "0 10px 22px rgba(36, 39, 39, 0.08)"
+        soft: "0 14px 30px rgba(15, 23, 42, 0.12)",
+        card: "0 6px 14px rgba(15, 23, 42, 0.10)"
       },
       borderRadius: {
         xl2: "1.25rem"

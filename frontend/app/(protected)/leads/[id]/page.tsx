@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -8,6 +7,7 @@ import { LeadForm } from "@/components/leads/lead-form";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PageBack } from "@/components/ui/page-back";
 import { apiFetch } from "@/lib/api";
 import { Lead } from "@/types/lead";
 
@@ -30,7 +30,10 @@ export default function LeadDetailsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Lead #{lead.lead_number}</h1>
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Gestao de contato</p>
+          <h1 className="text-[24px] font-semibold leading-tight text-slate-800">Detalhes do lead</h1>
+        </div>
         <div className="flex gap-2">
           {lead.whatsapp ? (
             <a
@@ -65,7 +68,7 @@ export default function LeadDetailsPage() {
       <Card>
         <LeadForm
           initial={lead}
-          submitLabel="Salvar altera��es"
+          submitLabel="Salvar alteracoes"
           onSubmit={async (payload) => {
             try {
               const updated = await apiFetch<Lead>(`/api/leads/${params.id}`, {
@@ -82,9 +85,7 @@ export default function LeadDetailsPage() {
       </Card>
 
       <div className="flex justify-between">
-        <Link href="/leads" className="text-sm text-brand-dark underline">
-          Voltar para lista
-        </Link>
+        <PageBack className="pt-0" fallbackHref="/leads" label="Voltar para lista" />
         <Button variant="danger" onClick={() => setShowDelete(true)}>
           Excluir lead
         </Button>
@@ -93,7 +94,7 @@ export default function LeadDetailsPage() {
       <ConfirmModal
         open={showDelete}
         title="Excluir lead"
-        message="Esta a��o n�o pode ser desfeita."
+        message="Esta acao nao pode ser desfeita."
         onClose={() => setShowDelete(false)}
         onConfirm={async () => {
           await apiFetch(`/api/leads/${params.id}`, { method: "DELETE" });

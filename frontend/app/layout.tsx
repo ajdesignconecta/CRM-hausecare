@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -10,13 +10,18 @@ const figtree = Figtree({
 
 export const metadata: Metadata = {
   title: "CRM-Hausecare",
-  description: "CRM para gestão de leads de Home Care"
+  description: "CRM para gestao de leads de Home Care",
+  icons: {
+    icon: "/nova-logo-web-2026-icon-4267x4267.png",
+    shortcut: "/nova-logo-web-2026-icon-4267x4267.png",
+    apple: "/nova-logo-web-2026-icon-4267x4267.png"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body className={figtree.className}>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={figtree.className} suppressHydrationWarning>
         {children}
         <Toaster richColors position="top-right" />
       </body>

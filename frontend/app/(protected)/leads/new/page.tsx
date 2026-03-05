@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LeadForm } from "@/components/leads/lead-form";
 import { Card } from "@/components/ui/card";
+import { PageBack } from "@/components/ui/page-back";
 import { apiFetch } from "@/lib/api";
 
 export default function NewLeadPage() {
@@ -14,7 +15,9 @@ export default function NewLeadPage() {
       <h1 className="text-2xl font-bold">Novo lead</h1>
       <Card>
         <LeadForm
+          mode="basic"
           submitLabel="Salvar lead"
+          onBack={() => router.push("/leads")}
           onSubmit={async (payload) => {
             try {
               await apiFetch("/api/leads", { method: "POST", body: JSON.stringify(payload) });
@@ -26,6 +29,7 @@ export default function NewLeadPage() {
           }}
         />
       </Card>
+      <PageBack fallbackHref="/leads" />
     </div>
   );
 }

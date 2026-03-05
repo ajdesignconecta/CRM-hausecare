@@ -13,11 +13,21 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(4000),
   DATABASE_URL: z.string().min(1),
+  DB_POOL_MAX: z.coerce.number().int().positive().default(20),
+  DB_POOL_IDLE_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  DB_POOL_CONNECTION_TIMEOUT_MS: z.coerce.number().int().positive().default(5_000),
+  DB_POOL_MAX_USES: z.coerce.number().int().positive().default(7_500),
+  RUN_STARTUP_PATCHES: z
+    .union([z.boolean(), z.string()])
+    .transform((v) => (typeof v === "string" ? v.toLowerCase() === "true" : v))
+    .default(false),
   JWT_SECRET: z.string().min(8),
   COOKIE_NAME: z.string().default("crm_session"),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
   APP_BASE_URL: z.string().default("http://localhost:3000"),
-  RESET_TOKEN_TTL_MINUTES: z.coerce.number().default(60)
+  RESET_TOKEN_TTL_MINUTES: z.coerce.number().default(60),
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
+  RATE_LIMIT_WINDOW: z.string().default("1 minute")
 });
 
 export const env = envSchema.parse(process.env);

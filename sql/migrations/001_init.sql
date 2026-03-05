@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS leads (
   organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   owner_user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   lead_number integer NOT NULL,
-  company varchar(180) NOT NULL,
+  company varchar(180),
   city varchar(120),
   phone varchar(40),
   phone_digits varchar(20),
@@ -159,3 +159,4 @@ DROP TRIGGER IF EXISTS trg_lead_counters_updated_at ON lead_counters;
 CREATE TRIGGER trg_lead_counters_updated_at
 BEFORE UPDATE ON lead_counters
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+

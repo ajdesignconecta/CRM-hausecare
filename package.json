@@ -7,7 +7,8 @@
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "build": "npm --prefix backend run build && npm --prefix frontend run build",
-    "check": "npm --prefix backend run check && npm --prefix frontend run check"
+    "check": "npm --prefix backend run check && npm --prefix frontend run check",
+    "verify:routes": "node scripts/verify-route-contract.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

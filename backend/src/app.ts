@@ -13,7 +13,10 @@ import { alertsRoutes } from "./modules/alerts/alerts.routes.js";
 
 export async function buildApp() {
   const app = Fastify({
-    logger: true
+    logger: true,
+    trustProxy: true,
+    disableRequestLogging: true,
+    bodyLimit: 12 * 1024 * 1024
   });
 
   await app.register(cors, {
@@ -28,8 +31,8 @@ export async function buildApp() {
   });
 
   await app.register(rateLimit, {
-    max: 100,
-    timeWindow: "1 minute"
+    max: env.RATE_LIMIT_MAX,
+    timeWindow: env.RATE_LIMIT_WINDOW
   });
 
   await app.register(dbPlugin);

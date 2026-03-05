@@ -21,6 +21,7 @@
     "fastify": "^5.2.1",
     "fastify-plugin": "^5.0.1",
     "pg": "^8.13.1",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {

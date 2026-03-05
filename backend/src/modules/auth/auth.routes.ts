@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { FastifyInstance } from "fastify";
 import { AppError } from "../../lib/errors.js";
@@ -11,14 +11,15 @@ import {
 } from "../../lib/utils.js";
 
 const registerSchema = z.object({
-  name: z.string().trim().min(2).max(120),
+  companyName: z.string().trim().min(2).max(180),
+  responsibleName: z.string().trim().min(2).max(120),
   email: z.string().trim().email().max(160),
   phone: z
     .string()
     .trim()
-    .min(10, "Telefone obrigatório")
+    .min(10, "Telefone obrigatÃ³rio")
     .max(30)
-    .refine((value) => value.replace(/\D/g, "").length >= 10, "Telefone inválido"),
+    .refine((value) => value.replace(/\D/g, "").length >= 10, "Telefone invÃ¡lido"),
   password: z.string().min(8).max(72),
 });
 
@@ -41,6 +42,27 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8).max(72)
 });
 
+const updateProfileSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  phone: z
+    .string()
+    .trim()
+    .min(10, "Telefone obrigatorio")
+    .max(30)
+    .refine((value) => value.replace(/\D/g, "").length >= 10, "Telefone invalido"),
+  avatar_url: z
+    .string()
+    .trim()
+    .max(10_000_000)
+    .refine(
+      (value) => value.length === 0 || /^https?:\/\//i.test(value) || /^data:image\/[a-zA-Z+.-]+;base64,/i.test(value),
+      "Avatar invalido"
+    )
+    .nullable()
+    .optional()
+    .or(z.literal(""))
+});
+
 const buildSessionPayload = (user: { id: string; organization_id: string; email: string }) => ({
   sub: user.id,
   organizationId: user.organization_id,
@@ -58,10 +80,10 @@ export async function authRoutes(app: FastifyInstance) {
       const email = payload.email.toLowerCase();
       const existing = await client.query("SELECT id FROM users WHERE email = $1 LIMIT 1", [email]);
       if (existing.rowCount) {
-        throw new AppError("Email já cadastrado", 409);
+        throw new AppError("Email jÃ¡ cadastrado", 409);
       }
 
-      const organizationName = `Organização de ${payload.name.trim()}`;
+      const organizationName = payload.companyName.trim();
       const phoneDigits = normalizeDigits(payload.phone);
       const phone = formatBrazilianPhone(phoneDigits);
 
@@ -75,12 +97,32 @@ export async function authRoutes(app: FastifyInstance) {
       const organizationId = orgResult.rows[0].id as string;
       const passwordHash = await bcrypt.hash(payload.password, 12);
 
-      const userResult = await client.query(
-        `INSERT INTO users (organization_id, name, email, phone, phone_digits, password_hash)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, organization_id, email`,
-        [organizationId, payload.name.trim(), email, phone, phoneDigits, passwordHash]
-      );
+      let userResult;
+      try {
+        userResult = await client.query(
+          `INSERT INTO users (organization_id, name, responsible_name, company_name, email, phone, phone_digits, password_hash)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           RETURNING id, organization_id, email`,
+          [
+            organizationId,
+            payload.responsibleName.trim(),
+            payload.responsibleName.trim(),
+            payload.companyName.trim(),
+            email,
+            phone,
+            phoneDigits,
+            passwordHash
+          ]
+        );
+      } catch (error: any) {
+        if (error?.code !== "42703") throw error;
+        userResult = await client.query(
+          `INSERT INTO users (organization_id, name, email, phone, phone_digits, password_hash)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING id, organization_id, email`,
+          [organizationId, payload.responsibleName.trim(), email, phone, phoneDigits, passwordHash]
+        );
+      }
 
       await client.query("COMMIT");
 
@@ -127,7 +169,7 @@ export async function authRoutes(app: FastifyInstance) {
       );
 
       if (!result.rowCount) {
-        throw new AppError("Credenciais inválidas", 401);
+        throw new AppError("Credenciais invÃ¡lidas", 401);
       }
 
       const user = result.rows[0] as {
@@ -139,7 +181,7 @@ export async function authRoutes(app: FastifyInstance) {
 
       const validPassword = await bcrypt.compare(payload.password, user.password_hash);
       if (!validPassword) {
-        throw new AppError("Credenciais inválidas", 401);
+        throw new AppError("Credenciais invÃ¡lidas", 401);
       }
 
       const token = await reply.jwtSign(buildSessionPayload(user));
@@ -178,7 +220,7 @@ export async function authRoutes(app: FastifyInstance) {
     );
 
     if (!userResult.rowCount) {
-      return { message: "Se o email existir, enviaremos as instruções." };
+      return { message: "Se o email existir, enviaremos as instruÃ§Ãµes." };
     }
 
     const user = userResult.rows[0] as { id: string; email: string };
@@ -193,7 +235,7 @@ export async function authRoutes(app: FastifyInstance) {
     const resetUrl = `${env.APP_BASE_URL}/auth/reset-password?token=${rawToken}`;
 
     return {
-      message: "Se o email existir, enviaremos as instruções.",
+      message: "Se o email existir, enviaremos as instruÃ§Ãµes.",
       resetUrl
     };
   });
@@ -220,7 +262,7 @@ export async function authRoutes(app: FastifyInstance) {
       );
 
       if (!tokenResult.rowCount) {
-        throw new AppError("Token inválido ou expirado", 400);
+        throw new AppError("Token invÃ¡lido ou expirado", 400);
       }
 
       const token = tokenResult.rows[0] as { id: string; user_id: string };
@@ -260,13 +302,13 @@ export async function authRoutes(app: FastifyInstance) {
       );
 
       if (!result.rowCount) {
-        throw new AppError("Usuário não encontrado", 404);
+        throw new AppError("UsuÃ¡rio nÃ£o encontrado", 404);
       }
 
       const user = result.rows[0] as { id: string; password_hash: string };
       const validPassword = await bcrypt.compare(payload.currentPassword, user.password_hash);
       if (!validPassword) {
-        throw new AppError("Senha atual inválida", 401);
+        throw new AppError("Senha atual invÃ¡lida", 401);
       }
 
       const passwordHash = await bcrypt.hash(payload.newPassword, 12);
@@ -279,25 +321,120 @@ export async function authRoutes(app: FastifyInstance) {
     }
   );
 
+  app.put(
+    "/api/auth/me",
+    {
+      preHandler: [app.authenticate]
+    },
+    async (request) => {
+      const payload = updateProfileSchema.parse(request.body);
+      const phoneDigits = normalizeDigits(payload.phone);
+      const phone = formatBrazilianPhone(phoneDigits);
+      const avatarUrl = payload.avatar_url ? payload.avatar_url : null;
+      let result;
+      try {
+        result = await app.db.query(
+          `WITH updated AS (
+             UPDATE users
+             SET name = $1,
+                 phone = $2,
+                 phone_digits = $3,
+                 avatar_url = $4,
+                 updated_at = NOW()
+             WHERE id = $5
+             RETURNING id, name, email, phone, avatar_url, organization_id
+           )
+           SELECT u.id, u.name, u.email, u.phone, u.avatar_url, u.organization_id, o.name AS organization_name
+           FROM updated u
+           JOIN organizations o ON o.id = u.organization_id`,
+          [payload.name.trim(), phone, phoneDigits, avatarUrl, request.user.sub]
+        );
+      } catch (error: any) {
+        if (error?.code !== "42703") throw error;
+
+        result = await app.db.query(
+          `WITH updated AS (
+             UPDATE users
+             SET name = $1,
+                 phone = $2,
+                 phone_digits = $3,
+                 updated_at = NOW()
+             WHERE id = $4
+             RETURNING id, name, email, phone, organization_id
+           )
+           SELECT u.id, u.name, u.email, u.phone, u.organization_id, o.name AS organization_name
+           FROM updated u
+           JOIN organizations o ON o.id = u.organization_id`,
+          [payload.name.trim(), phone, phoneDigits, request.user.sub]
+        );
+        result.rows = result.rows.map((row: any) => ({ ...row, avatar_url: null }));
+      }
+
+      if (!result.rowCount) {
+        throw new AppError("UsuÃƒÂ¡rio nÃƒÂ£o encontrado", 404);
+      }
+
+      return result.rows[0];
+    }
+  );
+
   app.get(
     "/api/auth/me",
     {
       preHandler: [app.authenticate]
     },
     async (request) => {
-      const result = await app.db.query(
-        `SELECT id, name, email, organization_id
-         FROM users
-         WHERE id = $1
-         LIMIT 1`,
-        [request.user.sub]
-      );
+      let result;
+      try {
+        result = await app.db.query(
+          `SELECT u.id, u.name, u.email, u.phone, u.avatar_url, u.role, u.organization_id, o.name AS organization_name
+           FROM users u
+           LEFT JOIN organizations o ON o.id = u.organization_id
+           WHERE u.id = $1
+           LIMIT 1`,
+          [request.user.sub]
+        );
+      } catch (error: any) {
+        // Fallback only for older schemas without avatar_url.
+        if (error?.code !== "42703") throw error;
 
-      if (!result.rowCount) {
-        throw new AppError("Usuário não encontrado", 404);
+        result = await app.db.query(
+          `SELECT u.id, u.name, u.email, u.phone, u.role, u.organization_id, o.name AS organization_name
+           FROM users u
+           LEFT JOIN organizations o ON o.id = u.organization_id
+           WHERE u.id = $1
+           LIMIT 1`,
+          [request.user.sub]
+        );
+        result.rows = result.rows.map((row: any) => ({ ...row, avatar_url: null }));
       }
 
-      return result.rows[0];
+      if (!result.rowCount) {
+        throw new AppError("UsuÃ¡rio nÃ£o encontrado", 404);
+      }
+
+      const user = result.rows[0] as {
+        id: string;
+        name: string;
+        email: string;
+        phone?: string | null;
+        avatar_url?: string | null;
+        role?: string | null;
+        organization_id: string;
+        organization_name?: string | null;
+      };
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone ?? "",
+        avatar_url: user.avatar_url ?? null,
+        role: user.role ?? "admin",
+        organization_id: user.organization_id,
+        organization_name: user.organization_name ?? "Organizacao"
+      };
     }
   );
 }
+
