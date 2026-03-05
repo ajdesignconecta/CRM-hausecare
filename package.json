@@ -7,7 +7,7 @@
     "dev": "concurrently -n backend,frontend -c blue,green \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
+    "build": "npm --prefix frontend install --include=dev && npm --prefix backend install --include=dev && npm --prefix frontend run build",
     "start": "npm --prefix frontend run start",
     "check": "npm --prefix backend run check && npm --prefix frontend run check",
     "verify:routes": "node scripts/verify-route-contract.mjs"
