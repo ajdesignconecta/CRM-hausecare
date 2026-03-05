@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "prebuild": "node ./scripts/prepare-backend-dist.mjs",
     "dev": "node ./scripts/dev.mjs",
     "dev:clean": "node ./scripts/dev.mjs --clean",
     "build": "next build",
-    "start": "next start -p 3010",
+    "prestart": "node ./scripts/prepare-backend-dist.mjs",
+    "start": "node ./scripts/start.mjs",
     "lint": "next lint",
     "check": "tsc --noEmit"
   },

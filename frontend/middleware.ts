@@ -13,6 +13,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // API routes are handled by route handlers and should not be redirected by page middleware.
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   const isPublic = PUBLIC_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
   const hasSession = Boolean(request.cookies.get("crm_session")?.value);
 

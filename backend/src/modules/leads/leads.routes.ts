@@ -1,7 +1,7 @@
 ﻿import { parse } from "csv-parse/sync";
 import { extname } from "node:path";
 import { FastifyInstance } from "fastify";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
 import { z } from "zod";
 import { AppError } from "../../lib/errors.js";
 import {
