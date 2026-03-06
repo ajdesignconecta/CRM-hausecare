@@ -39,6 +39,10 @@ export async function buildApp() {
   await app.register(authPlugin);
 
   app.get("/health", async () => ({ ok: true }));
+  app.get("/api/diag/db", async () => {
+    const ping = await app.db.query("SELECT 1 as ok");
+    return { ok: ping.rows[0]?.ok === 1 };
+  });
 
   await authRoutes(app);
   await leadsRoutes(app);
@@ -46,15 +50,23 @@ export async function buildApp() {
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof ZodError) {
-      return reply.code(400).send({ message: "Dados inválidos", issues: error.issues });
+      return reply.code(400).send({ message: "Dados invalidos", issues: error.issues });
     }
 
     if (error instanceof AppError) {
       return reply.code(error.statusCode).send({ message: error.message });
     }
 
+    console.error("[backend-unhandled-error]", {
+      message: (error as any)?.message,
+      stack: (error as any)?.stack,
+      code: (error as any)?.code
+    });
     app.log.error(error);
-    return reply.code(500).send({ message: "Erro interno do servidor" });
+    return reply.code(500).send({
+      message: "Erro interno do servidor",
+      code: (error as any)?.code ?? "INTERNAL_ERROR"
+    });
   });
 
   return app;
