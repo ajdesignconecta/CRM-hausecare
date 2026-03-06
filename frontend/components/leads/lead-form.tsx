@@ -14,8 +14,8 @@ const schema = z.object({
   phone: z.string().optional().nullable(),
   whatsapp: z.string().optional().nullable(),
   email: z.string().email("Email invalido").optional().nullable().or(z.literal("")),
-  site: z.string().url("URL invalida").optional().nullable().or(z.literal("")),
-  maps_url: z.string().url("URL invalida").optional().nullable().or(z.literal("")),
+  site: z.string().max(220, "URL muito longa").optional().nullable().or(z.literal("")),
+  maps_url: z.string().max(350, "URL muito longa").optional().nullable().or(z.literal("")),
   decisor_name_role: z.string().optional().nullable(),
   had_response: z.enum(["sim", "nao"]).nullable().optional(),
   lead_level: z.enum(["com_interesse", "sem_interesse", "nao_respondeu"]).nullable().optional(),
@@ -36,6 +36,14 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
+
+const normalizeOptionalUrl = (value: string | null | undefined): string | null => {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  return `https://${trimmed}`;
+};
 
 type Props = {
   initial?: Lead;
@@ -90,8 +98,8 @@ export function LeadForm({ initial, onSubmit, submitLabel, mode = "full", onBack
           status: data.status ?? "lead_novo",
           company: data.company || null,
           email: data.email || null,
-          site: data.site || null,
-          maps_url: data.maps_url || null,
+          site: normalizeOptionalUrl(data.site),
+          maps_url: normalizeOptionalUrl(data.maps_url),
           city: data.city || null,
           phone: data.phone || null,
           whatsapp: data.whatsapp || null,

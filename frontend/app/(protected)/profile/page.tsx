@@ -430,8 +430,12 @@ export default function ProfilePage() {
               type="button"
               variant="secondary"
               onClick={async () => {
-                await apiFetch("/api/auth/logout", { method: "POST" });
-                window.location.href = "/auth/login";
+                try {
+                  await apiFetch("/api/auth/logout", { method: "POST" });
+                } catch {
+                  // Keep UX stable even when API logout fails in production edge cases.
+                }
+                window.location.replace("/auth/login");
               }}
             >
               Sair desta sessao

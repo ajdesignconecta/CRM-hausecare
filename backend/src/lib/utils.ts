@@ -12,6 +12,28 @@ export const normalizeDigits = (value: string | null | undefined): string | null
   return digits.length > 0 ? digits : null;
 };
 
+export const normalizeOptionalHttpUrl = (value: string | null | undefined): string | null => {
+  const normalized = normalizeString(value);
+  if (!normalized) return null;
+
+  let candidate = normalized;
+  if (candidate.startsWith("//")) {
+    candidate = `https:${candidate}`;
+  } else if (!/^https?:\/\//i.test(candidate)) {
+    candidate = `https://${candidate}`;
+  }
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+};
+
 export const formatBrazilianPhone = (digits: string | null): string | null => {
   if (!digits) return null;
 

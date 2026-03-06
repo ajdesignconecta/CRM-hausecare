@@ -1,6 +1,11 @@
 import { PoolClient } from "pg";
 import { LeadInput } from "./lead.schemas.js";
-import { formatBrazilianPhone, normalizeDigits, normalizeString } from "../../lib/utils.js";
+import {
+  formatBrazilianPhone,
+  normalizeDigits,
+  normalizeOptionalHttpUrl,
+  normalizeString
+} from "../../lib/utils.js";
 
 export async function nextLeadNumber(
   client: PoolClient,
@@ -46,8 +51,8 @@ export function normalizeLeadInput(input: LeadInput) {
     whatsapp: formatBrazilianPhone(whatsappDigits),
     whatsapp_digits: whatsappDigits,
     email: normalizeString(input.email ?? null)?.toLowerCase() ?? null,
-    site: normalizeString(input.site ?? null),
-    maps_url: normalizeString(input.maps_url ?? null),
+    site: normalizeOptionalHttpUrl(input.site ?? null),
+    maps_url: normalizeOptionalHttpUrl(input.maps_url ?? null),
     decisor_name_role: normalizeString(input.decisor_name_role),
     had_response: input.had_response ?? null,
     lead_level: input.lead_level ?? null,

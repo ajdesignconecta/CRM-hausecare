@@ -443,9 +443,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 className="block w-full rounded-md bg-white/10 px-3 py-2.5 text-left text-sm font-medium text-white transition hover:bg-white/20"
                 onClick={async () => {
-                  await apiFetch("/api/auth/logout", { method: "POST" });
+                  try {
+                    await apiFetch("/api/auth/logout", { method: "POST" });
+                  } catch {
+                    // Even if logout API fails, continue to login to avoid client crash loop.
+                  }
                   setSidebarOpen(false);
-                  router.replace("/auth/login");
+                  window.location.replace("/auth/login");
                 }}
               >
                 Sair
