@@ -4,16 +4,32 @@ const { resolve } = require("node:path");
 
 const port = process.env.PORT || "3000";
 const frontendDir = resolve(__dirname, "frontend");
-const nextBin = resolve(frontendDir, "node_modules", "next", "dist", "bin", "next");
+const frontendNextBin = resolve(frontendDir, "node_modules", "next", "dist", "bin", "next");
+const rootNextBin = resolve(__dirname, "node_modules", "next", "dist", "bin", "next");
+const frontendBuildDir = resolve(frontendDir, ".next");
+const rootBuildDir = resolve(__dirname, ".next");
+
+const nextBin = existsSync(frontendNextBin) ? frontendNextBin : rootNextBin;
+const runDir = existsSync(frontendBuildDir)
+  ? frontendDir
+  : existsSync(rootBuildDir)
+    ? __dirname
+    : frontendDir;
 
 if (!existsSync(nextBin)) {
-  console.error("[server] Next.js nao encontrado em frontend/node_modules.");
-  console.error("[server] Execute instalacao de dependencias antes de iniciar.");
+  console.error("[server] Next.js nao encontrado.");
+  console.error("[server] Verifique se a instalacao de dependencias foi executada.");
+  process.exit(1);
+}
+
+if (!existsSync(frontendBuildDir) && !existsSync(rootBuildDir)) {
+  console.error("[server] Build .next nao encontrado.");
+  console.error("[server] Verifique se o comando de build da implantacao esta configurado.");
   process.exit(1);
 }
 
 const child = spawn(process.execPath, [nextBin, "start", "-p", String(port)], {
-  cwd: frontendDir,
+  cwd: runDir,
   env: process.env,
   stdio: "inherit"
 });
