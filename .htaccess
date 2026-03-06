@@ -1,7 +1,18 @@
-Options -Indexes
 DirectoryIndex index.php index.html
+
+<IfModule mod_authz_core.c>
+  Require all granted
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Allow from all
+</IfModule>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteRule ^$ /index.php [L]
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  RewriteRule ^$ index.php [L]
 </IfModule>
