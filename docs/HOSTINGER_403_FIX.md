@@ -1,33 +1,27 @@
-# Correção de Erro 403 no Domínio (Hostinger)
+# Correcao de Erro 403 no Dominio (Hostinger)
 
-Se o domínio `hausecarecrm.com.br` mostra `403 Forbidden`, normalmente o domínio está apontando para uma pasta sem `index` executável do app Node.
+Se o dominio `hausecarecrm.com.br` mostra `403 Forbidden`, quase sempre a raiz `public_html` esta com publicacao incorreta para este projeto.
 
-## Diagnóstico rápido
+## Diagnostico rapido
 
-1. Se abrir esta tela de fallback (`index.php`), o domínio está servindo arquivos estáticos via Apache.
-2. O CRM deste repositório não é PHP; ele roda como Node.js.
+1. Em `public_html`, confirme se existe um `index.html` de teste.
+2. Se existir `.htaccess`, renomeie para `.htaccess-disabled` e teste novamente.
+3. Se o `index.html` abrir, a pasta/DOMinio esta correta e o bloqueio era de regra.
+4. Se ainda nao abrir, ajuste Document Root e WAF/ModSecurity no painel.
 
-## Publicação correta
+## Publicacao correta deste CRM
 
-1. No painel da Hostinger, abra `Advanced -> Node.js`.
-2. Crie a aplicação Node apontando para a pasta deste projeto.
-3. Defina versão Node `22.x`.
-4. Instale dependências.
-5. Rode build:
+Este sistema roda como app Node.js (Next.js + backend), nao como site PHP estatico.
 
-```bash
-npm run build
-```
+1. Hostinger -> `Advanced -> Node.js`.
+2. Crie o app apontando para a pasta do projeto completo.
+3. Node version: `22.x`.
+4. Install: `npm install`.
+5. Build: `npm run build`.
+6. Start: `npm start`.
+7. Vincule o dominio `hausecarecrm.com.br` ao app Node.
 
-6. Configure start command:
-
-```bash
-npm start
-```
-
-7. Em seguida, vincule o domínio ao app Node criado.
-
-## Variáveis de ambiente mínimas
+## Variaveis de ambiente minimas
 
 ### backend/.env
 
@@ -44,7 +38,3 @@ npm start
 
 - `NEXT_PUBLIC_API_URL=https://hausecarecrm.com.br/api`
 - `PORT=3010`
-
-## Observação
-
-O fallback (`index.php` e `.htaccess`) existe apenas para impedir 403 quando o domínio estiver apontado para pasta errada. O funcionamento final do CRM depende do app Node ativo.
