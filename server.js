@@ -1,41 +1,25 @@
-const { spawn } = require("node:child_process");
-const { existsSync } = require("node:fs");
-const { resolve } = require("node:path");
+const http = require("node:http");
+const next = require("next");
 
-const port = process.env.PORT || process.env.APP_PORT || process.env.WEB_PORT || "8080";
-const frontendDir = resolve(__dirname, "frontend");
-const frontendNextBin = resolve(frontendDir, "node_modules", "next", "dist", "bin", "next");
-const rootNextBin = resolve(__dirname, "node_modules", "next", "dist", "bin", "next");
-const frontendBuildDir = resolve(frontendDir, ".next");
-const rootBuildDir = resolve(__dirname, ".next");
+const port = Number(process.env.PORT || process.env.APP_PORT || process.env.WEB_PORT || 8081);
+const host = process.env.HOST || "0.0.0.0";
 
-const nextBin = existsSync(frontendNextBin) ? frontendNextBin : rootNextBin;
-const runDir = existsSync(frontendBuildDir)
-  ? frontendDir
-  : existsSync(rootBuildDir)
-    ? __dirname
-    : frontendDir;
-
-if (!existsSync(nextBin)) {
-  console.error("[server] Next.js nao encontrado.");
-  console.error("[server] Verifique se a instalacao de dependencias foi executada.");
-  process.exit(1);
-}
-
-if (!existsSync(frontendBuildDir) && !existsSync(rootBuildDir)) {
-  console.error("[server] Build .next nao encontrado.");
-  console.error("[server] Verifique se o comando de build da implantacao esta configurado.");
-  process.exit(1);
-}
-
-const child = spawn(process.execPath, [nextBin, "start", "-p", String(port)], {
-  cwd: runDir,
-  env: process.env,
-  stdio: "inherit"
+const app = next({
+  dev: false,
+  dir: "./frontend"
 });
 
-child.on("exit", (code) => process.exit(code ?? 0));
-child.on("error", (error) => {
-  console.error("[server] Falha ao iniciar app:", error);
-  process.exit(1);
-});
+const handle = app.getRequestHandler();
+
+app
+  .prepare()
+  .then(() => {
+    const server = http.createServer((req, res) => handle(req, res));
+    server.listen(port, host, () => {
+      console.log(`[server] Next iniciado em http://${host}:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("[server] Falha ao iniciar:", error);
+    process.exit(1);
+  });
