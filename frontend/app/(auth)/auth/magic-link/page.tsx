@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api";
 import { AuthHeader } from "@/components/auth/auth-header";
 
 const schema = z.object({
@@ -17,32 +17,32 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export default function ForgotPasswordPage() {
+export default function MagicLinkPage() {
   const { register, handleSubmit, formState } = useForm<FormData>({
     resolver: zodResolver(schema)
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await apiFetch<{ message: string; resetUrl?: string }>("/api/auth/forgot-password", {
+      const response = await apiFetch<{ message: string; loginUrl?: string }>("/api/auth/magic-link/request", {
         method: "POST",
         body: JSON.stringify(data)
       });
-
-      toast.success(response.message || "Se o email existir, enviaremos as instrucoes.");
+      toast.success(response.loginUrl ? `Link: ${response.loginUrl}` : response.message);
     } catch (error: any) {
-      toast.error(error.message ?? "Erro na solicitacao");
+      toast.error(error.message ?? "Erro ao gerar link de acesso");
     }
   };
 
   return (
     <>
       <AuthHeader
-        eyebrow="Recuperacao"
-        title="Esqueci minha senha"
-        description="Informe o email corporativo para receber um link seguro de redefinicao."
+        eyebrow="Acesso rapido"
+        title="Entrar com magic link"
+        description="Informe seu email para receber um link de login sem senha."
         titleClassName="text-[1.65rem]"
       />
+
       <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-3">
         <div>
           <label className="mb-1 block text-sm font-semibold text-slate-700">Email da conta</label>
@@ -57,16 +57,13 @@ export default function ForgotPasswordPage() {
           className="absolute left-[-9999px] opacity-0"
           aria-hidden
         />
-        <Button
-          className="mt-2 w-full rounded-2xl py-3 text-base shadow-[0_14px_26px_rgba(0,195,165,0.28)]"
-          type="submit"
-          disabled={formState.isSubmitting}
-        >
-          {formState.isSubmitting ? "Enviando..." : "Gerar link de reset"}
+        <Button className="mt-2 w-full rounded-2xl py-3 text-base" type="submit" disabled={formState.isSubmitting}>
+          {formState.isSubmitting ? "Gerando link..." : "Gerar magic link"}
         </Button>
       </form>
-      <p className="mt-4 text-sm text-slate-600">
-        Lembrou sua senha?{" "}
+
+      <p className="mt-6 text-sm text-slate-600">
+        Ja tem senha?{" "}
         <Link href="/auth/login" className="font-semibold text-brand-dark hover:underline">
           Voltar ao login
         </Link>

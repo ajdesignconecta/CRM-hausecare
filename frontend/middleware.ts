@@ -4,7 +4,10 @@ const PUBLIC_ROUTES = [
   "/auth/login",
   "/auth/register",
   "/auth/forgot-password",
-  "/auth/reset-password"
+  "/auth/reset-password",
+  "/auth/magic-link",
+  "/politica-de-privacidade",
+  "/termos-de-uso"
 ];
 
 export function middleware(request: NextRequest) {

@@ -17,6 +17,18 @@ const envSchema = z.object({
   DB_POOL_IDLE_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   DB_POOL_CONNECTION_TIMEOUT_MS: z.coerce.number().int().positive().default(5_000),
   DB_POOL_MAX_USES: z.coerce.number().int().positive().default(7_500),
+  DB_SSL: z
+    .union([z.boolean(), z.string()])
+    .transform((v) => (typeof v === "string" ? v.toLowerCase() === "true" : v))
+    .optional(),
+  AUTH_ANTIBOT_MODE: z.enum(["off", "log", "enforce"]).default("off"),
+  TURNSTILE_SECRET: z.string().optional(),
+  AUTH_MAGIC_LINK_TTL_MINUTES: z.coerce.number().int().positive().default(15),
+  AUTH_MFA_TTL_MINUTES: z.coerce.number().int().positive().default(10),
+  AUTH_DEV_EXPOSE_SECRETS: z
+    .union([z.boolean(), z.string()])
+    .transform((v) => (typeof v === "string" ? v.toLowerCase() === "true" : v))
+    .default(false),
   RUN_STARTUP_PATCHES: z
     .union([z.boolean(), z.string()])
     .transform((v) => (typeof v === "string" ? v.toLowerCase() === "true" : v))

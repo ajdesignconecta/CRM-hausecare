@@ -67,7 +67,34 @@ input,
 select,
 textarea {
   @apply w-full rounded-xl border bg-white px-3 py-2 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/25;
-  border-color: var(--border-strong);
+  border-color: #afc2d3;
+}
+
+.auth-form-card input,
+.auth-form-card select,
+.auth-form-card textarea {
+  padding-top: 0.48rem;
+  padding-bottom: 0.48rem;
+  font-size: 0.93rem;
+  border-color: #9eb3c7;
+}
+
+.auth-form-card input:focus,
+.auth-form-card select:focus,
+.auth-form-card textarea:focus {
+  border-color: #00a990;
+  box-shadow: 0 0 0 2px rgba(0, 169, 144, 0.14);
+}
+
+.auth-form-card label {
+  margin-bottom: 0.2rem !important;
+  font-size: 0.9rem !important;
+}
+
+.auth-form-card .ui-btn {
+  padding-top: 0.62rem !important;
+  padding-bottom: 0.62rem !important;
+  font-size: 0.95rem !important;
 }
 
 input::placeholder,
@@ -150,10 +177,6 @@ html[data-density="compact"] table tbody td {
 
   .auth-brand-copy p {
     margin-top: 0.6rem;
-  }
-
-  .auth-brand-stats {
-    display: none;
   }
 }
 

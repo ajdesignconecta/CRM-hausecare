@@ -81,12 +81,28 @@ const metricClass = (value: number) => {
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [onboardingReady, setOnboardingReady] = useState<boolean | null>(null);
+  const [loadingOnboarding, setLoadingOnboarding] = useState(true);
 
   useEffect(() => {
+    apiFetch<{ completed: boolean }>("/api/auth/onboarding-status")
+      .then((status) => setOnboardingReady(status.completed))
+      .catch(() => setOnboardingReady(true))
+      .finally(() => setLoadingOnboarding(false));
+  }, []);
+
+  useEffect(() => {
+    if (onboardingReady === false) {
+      window.location.href = "/onboarding";
+    }
+  }, [onboardingReady]);
+
+  useEffect(() => {
+    if (onboardingReady !== true) return;
     apiFetch<DashboardSummary>("/api/dashboard/summary")
       .then(setSummary)
       .catch(() => setSummary(null));
-  }, []);
+  }, [onboardingReady]);
 
   const topCards = useMemo(() => {
     if (!summary) return [];
@@ -115,6 +131,10 @@ export default function DashboardPage() {
       return { key, label, value, pct: Math.max(8, Math.round((value / max) * 100)) };
     });
   }, [summary]);
+
+  if (loadingOnboarding || onboardingReady === false) {
+    return <Card>Validando onboarding...</Card>;
+  }
 
   if (!summary) {
     return <Card>Carregando dashboard...</Card>;
