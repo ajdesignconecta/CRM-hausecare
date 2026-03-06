@@ -13,35 +13,52 @@ function toInjectHeaders(request: NextRequest): Record<string, string> {
 }
 
 async function handle(request: NextRequest) {
-  const app = await getBackendApp();
-  const method = request.method.toUpperCase();
-  const url = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-  const headers = toInjectHeaders(request);
-  const hasBody = method !== "GET" && method !== "HEAD";
+  try {
+    const app = await getBackendApp();
+    const method = request.method.toUpperCase();
+    const url = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+    const headers = toInjectHeaders(request);
+    const hasBody = method !== "GET" && method !== "HEAD";
 
-  const payload = hasBody ? Buffer.from(await request.arrayBuffer()) : undefined;
+    const payload = hasBody ? Buffer.from(await request.arrayBuffer()) : undefined;
 
-  const response = await app.inject({
-    method,
-    url,
-    headers,
-    payload
-  });
+    const response = await app.inject({
+      method,
+      url,
+      headers,
+      payload
+    });
 
-  const outHeaders = new Headers();
-  for (const [key, value] of Object.entries(response.headers)) {
-    if (value === undefined) continue;
-    if (Array.isArray(value)) {
-      for (const item of value) outHeaders.append(key, item);
-      continue;
+    const outHeaders = new Headers();
+    for (const [key, value] of Object.entries(response.headers)) {
+      if (value === undefined) continue;
+      if (Array.isArray(value)) {
+        for (const item of value) outHeaders.append(key, item);
+        continue;
+      }
+      outHeaders.set(key, String(value));
     }
-    outHeaders.set(key, String(value));
-  }
 
-  return new Response(response.rawPayload, {
-    status: response.statusCode,
-    headers: outHeaders
-  });
+    return new Response(response.rawPayload, {
+      status: response.statusCode,
+      headers: outHeaders
+    });
+  } catch (error: any) {
+    console.error("[api-bridge] request failed", {
+      path: request.nextUrl.pathname,
+      method: request.method,
+      message: error?.message,
+      stack: error?.stack
+    });
+
+    return Response.json(
+      {
+        message: "Falha na ponte API interna",
+        detail: error?.message ?? "Erro desconhecido"
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -63,4 +80,3 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   return handle(request);
 }
-
