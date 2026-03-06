@@ -1,5 +1,12 @@
-export const API_URL =
+const rawApiUrl =
   process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "development" ? "http://localhost:4000" : "");
+
+function normalizeApiBase(url: string): string {
+  // Requests already use paths starting with /api, so avoid /api/api when env is misconfigured.
+  return url.replace(/\/+$/, "").replace(/\/api$/, "");
+}
+
+export const API_URL = normalizeApiBase(rawApiUrl);
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
