@@ -2,7 +2,7 @@ const { spawn } = require("node:child_process");
 const { existsSync } = require("node:fs");
 const { resolve } = require("node:path");
 
-const port = process.env.PORT || "3000";
+const port = process.env.PORT || process.env.APP_PORT || process.env.WEB_PORT || "8080";
 const frontendDir = resolve(__dirname, "frontend");
 const frontendNextBin = resolve(frontendDir, "node_modules", "next", "dist", "bin", "next");
 const rootNextBin = resolve(__dirname, "node_modules", "next", "dist", "bin", "next");
