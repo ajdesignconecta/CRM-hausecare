@@ -43,6 +43,27 @@ export async function buildApp() {
     const ping = await app.db.query("SELECT 1 as ok");
     return { ok: ping.rows[0]?.ok === 1 };
   });
+  app.get("/api/diag/env-db", async () => {
+    try {
+      const parsed = new URL(env.DATABASE_URL);
+      const maskedUser =
+        parsed.username.length <= 3
+          ? `${parsed.username[0] ?? "*"}***`
+          : `${parsed.username.slice(0, 2)}***${parsed.username.slice(-2)}`;
+      return {
+        protocol: parsed.protocol,
+        host: parsed.host,
+        database: parsed.pathname,
+        user_masked: maskedUser,
+        hasPassword: parsed.password.length > 0
+      };
+    } catch (error: any) {
+      return {
+        invalid: true,
+        message: error?.message ?? "Invalid URL"
+      };
+    }
+  });
 
   await authRoutes(app);
   await leadsRoutes(app);
